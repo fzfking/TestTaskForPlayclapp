@@ -15,11 +15,8 @@ namespace Sources
         private float _distance;
         private bool _isEnabled = false;
         private readonly ICoroutineRunner _coroutineRunner;
-        private readonly CubeModel _cubePrefab;
-        private readonly Transform _spawnPoint;
-        private readonly List<CubeModel> _cubesPool;
-        private const int DefaultPoolSize = 10;
-        private Coroutine _spawnerCoroutine;
+        private readonly CubesPool _cubesPool;
+        private readonly Coroutine _spawnerCoroutine;
 
         public Spawner(UserSettings settings, ICoroutineRunner coroutineRunner, CubeModel cubePrefab, Transform spawnPoint)
         {
@@ -57,11 +54,8 @@ namespace Sources
                 }
             });
             _coroutineRunner = coroutineRunner;
-            _cubePrefab = cubePrefab;
-            _spawnPoint = spawnPoint;
 
-            _cubesPool = new List<CubeModel>(DefaultPoolSize);
-            ExpandCubesPool();
+            _cubesPool = new CubesPool(cubePrefab, spawnPoint);
             _spawnerCoroutine = coroutineRunner.StartCoroutine(SpawnNewCubes());
         }
 
@@ -76,40 +70,14 @@ namespace Sources
             field.text = (-value).ToString(CultureInfo.InvariantCulture);
             return true;
         }
-
-        private void ExpandCubesPool()
-        {
-            for (int i = 0; i < DefaultPoolSize; i++)
-            {
-                var cube = GameObject.Instantiate(_cubePrefab, _spawnPoint);
-                cube.gameObject.SetActive(false);
-                _cubesPool.Add(cube);
-            }
-        }
-
-        private CubeModel GetFreeCubeFromPool()
-        {
-            while (true)
-            {
-                var cube = _cubesPool.FirstOrDefault(c => c.gameObject.activeSelf == false);
-                if (cube == null)
-                {
-                    ExpandCubesPool();
-                    continue;
-                }
-
-                return cube;
-            }
-        }
-
+        
         private IEnumerator SpawnNewCubes()
         {
             while (true)
             {
                 if (_isEnabled)
                 {
-                    var cube = GetFreeCubeFromPool();
-                    cube.transform.position = _spawnPoint.position;
+                    var cube = _cubesPool.GetFree();
                     cube.gameObject.SetActive(true);
                     if (_speed == 0f)
                     {
