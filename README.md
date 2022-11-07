@@ -9,7 +9,7 @@
  
 ## Реализация
 
-<p align="center"><img src="https://i.ibb.co/S3gKyx7/Game-Play-Present.gif" alt="Game-Play-Present" border="0"></p>
+[GIF геймплея](https://i.ibb.co/S3gKyx7/Game-Play-Present.gif)
 
 ## Сборка
 
